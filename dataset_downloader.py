@@ -29,6 +29,7 @@ class DatasetDownloader:
             try:
                 with zipfile.ZipFile(self.__filename, 'r') as zip_ref:
                     zip_ref.extractall(self.__save_dir)
+                    os.remove(self.__filename)
                 print(f"Archivo extraído exitosamente en '{self.__save_dir}'.")
             except zipfile.BadZipFile as e:
                 print(f"Error al extraer el archivo ZIP: {e}")
