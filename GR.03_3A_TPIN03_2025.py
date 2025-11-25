@@ -304,25 +304,25 @@ class AnalizadorRobosVehiculos:
     
     def ejecutar_analisis_completo(self):
         if not self.cargar_datos():
-            return
-        
-        self.procesar_datos()
-        
-        stats_generales = self.estadisticas_generales()
-        casos_provincia = self.analisis_por_provincia()
-        top_marcas = self.analisis_marcas()
-        
-        print("\n" + "="*60)
-        print("GENERANDO VISUALIZACIONES")
-        print("="*60)
-        
-        self.grafico_provincias(casos_provincia)
-        self.grafico_marcas(top_marcas)
-        self.grafico_antiguedad()
-        self.grafico_evolucion_temporal()
-        
-        input("\nPresione Enter para continuar...")
-        limpiar_pantalla()
+            print("No se pudo cargar el dataset. Finalizando análisis.")
+        else:        
+            self.procesar_datos()
+            
+            stats_generales = self.estadisticas_generales()
+            casos_provincia = self.analisis_por_provincia()
+            top_marcas = self.analisis_marcas()
+            
+            print("\n" + "="*60)
+            print("GENERANDO VISUALIZACIONES")
+            print("="*60)
+            
+            self.grafico_provincias(casos_provincia)
+            self.grafico_marcas(top_marcas)
+            self.grafico_antiguedad()
+            self.grafico_evolucion_temporal()
+            
+            input("\nPresione Enter para continuar...")
+            limpiar_pantalla()
 
 
 def mostrar_menu():
