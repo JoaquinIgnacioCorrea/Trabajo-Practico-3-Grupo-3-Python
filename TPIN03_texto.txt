@@ -1,0 +1,139 @@
+
+Python
+Trabajo Práctico Integrador
+Actividad Individual: análisis de datos
+Nro: 03
+
+Consideraciones: Leer los orientadores de las clases
+
+En este trabajo integrador, deberás aplicar todos los conceptos planteados en cada una de las clases. En este sentido, debes buscar el modo de aplicar cada concepto publicado y sus variantes. Utilizarás los principios de diseño de algoritmos aplicados a una solución general con Python.
+Objetivo: El estudiante deberá aplicar técnicas básicas de análisis de datos usando Python, Pandas y Matplotlib, partiendo de un dataset real o simulado. Se evaluará su capacidad para transformar datos, generar visualizaciones y documentar correctamente el proceso técnico.
+Material para entregar (Excluyente)
+1- Carpeta comprimida con el código fuente completo
+2- Documento (.doc) con informe o documentación que describa el problema abordado, los algoritmos diseñados, la implementación del sistema y los resultados obtenidos.
+3- Video con corrida del código y descripción del proyecto. El video no debe tener más de 3 minutos y detallará los aspectos positivos que considera pertinentes.
+4- Formato de entrega del ZIP o carpeta:
+GR_##_C_TPIN03_2025.zip
+Ejemplo: GR.03_3J_TPIN03_2025.zip
+
+Datos obligatorios
+El trabajo debe incluir en la carátula:
+1- Nombre completo de todos los integrantes.
+2- Legajo.
+3- Comisión.
+4- Día de cursada.
+
+PARA APROBAR CON 7 (SIETE)
+Dataset
+1. Elegir un dataset (propio, descargado o simulado).
+2. Debe tener al menos 5 columnas y más de 200 filas.
+3. Puede estar en formato .csv
+
+Transformación a DataFrame
+4. Usar Pandas obligatoriamente para:
+5. Leer el dataset.
+6. Convertirlo en un DataFrame.
+7. Realizar al menos 3 transformaciones, por ejemplo:
+   a. Renombrar columnas.
+   b. Filtrado condicional.
+   c. Creación de nuevas columnas.
+   d. Eliminación de filas/columnas.
+   e. Conversión de tipos de datos.
+
+Análisis y Métricas
+8. Calcular al menos 2 métricas estadísticas, por ejemplo:
+   Promedio, mediana, máximo, mínimo.
+   Conteos por categoría.
+   Correlaciones simples.
+
+Visualización con Matplotlib
+9. Generar al menos 1 gráfico usando Matplotlib (no vale Seaborn).
+10. Puede ser:
+   a. Línea
+   b. Barras
+   c. Pie
+   d. Scatter
+   e. Histograma
+
+Código organizado
+11. Entregar un archivo .py.
+
+Tu proyecto debe incluir obligatoriamente:
+1- Uso de variables de distintos tipos (int, float, str, bool).
+2- Uso de tuplas, listas y diccionarios.
+3- Estructuras de control con for y while.
+4- Al menos 2 subrutinas definidas por ustedes (funciones).
+5- Separación de código en módulos: uno para funciones y otro para el programa principal.
+6- Comentarios adecuados y uso de nombres significativos.
+7- Manejo de entradas por teclado (input) y salidas (print).
+8- Aplicación de algoritmos de control de flujo, como menús o validaciones.
+
+Criterios de evaluación
+Originalidad de la Propuesta:
+a. La solución propuesta aborda el problema de una manera novedosa o creativa.
+b. El enfoque utilizado para resolver el problema demuestra originalidad y pensamiento crítico y no se encuentran similitudes con otros proyectos del curso.
+
+Integridad Intelectual del Contenido:
+a. El trabajo muestra evidencia de investigación y comprensión del problema y su contexto.
+b. No se evidencia copias o plagios en la presentación
+
+Eficiencia y Eficacia de la Solución:
+a. La solución propuesta es eficiente en términos de uso de recursos computacionales y tiempo de ejecución y respeta las buenas prácticas planteadas en el curso
+
+Claridad y Legibilidad del Código:
+a. El código es claro, legible y está bien organizado
+b. Se han utilizado nombres de variables y funciones descriptivos y significativos
+c. El código incluye comentarios adecuados que explican su funcionalidad y decisiones de diseño
+d. Se desaprobará automáticamente cualquier trabajo con evidencia de:
+   • Copia de código desde internet sin comprensión.
+   • Uso de herramientas de IA para escribir el código sin justificación.
+   • Coincidencia parcial o total con trabajos de otros estudiantes.
+
+Documentación y Presentación:
+a. El informe o la documentación proporcionada son claros, completos y bien estructurados
+b. El estudiante ha explicado adecuadamente el problema abordado, los algoritmos diseñados y la implementación del sistema
+
+OPCIONALES PARA NOTA 8, 9 O 10
+Los siguientes puntos son opcionales, pero necesarios para que la nota final pueda estar entre 8 y 10.
+
+El estudiante puede sumar más de uno para potenciar su calificación.
+Uso de Clases (POO)
+Debe contener:
+• Atributos internos (ej. DataFrame)
+• Métodos propios (carga, transformación, plot, etc.)
+
+Uso de Numpy
+Aplicar al menos una operación numérica con numpy, por ejemplo:
+• Normalización de columnas.
+• Cálculo vectorizado.
+• Generación de nuevos valores.
+
+Web Scraping
+Agregar un pequeño conjunto extra de datos desde alguna fuente web pública, por ejemplo:
+• Tabla HTML.
+• API simple (si no requiere clave).
+• Lectura de precios o indicadores.
+Debe:
+• Ser incorporado al DataFrame principal para comparación.
+
+Gráficos
+Deben incluirse 3 gráficos en total.
+• Al menos uno NO puede ser ni de barras ni de torta.
+Ejemplos válidos:
+   o Scatter
+   o Histogramas
+   o Boxplot
+   o Gráficos de líneas
+   o Heatmap (si lo construyen manualmente con matplotlib + numpy)
+
+Algoritmo de Aprendizaje Supervisado
+Debe incluir:
+• Explicación del algoritmo elegido.
+• Conclusión técnica.
+
+Penalizaciones
+Uso desmedido de IA
+Se penalizará si:
+• El código NO se entiende o no coincide con lo explicado en el informe.
+• Se detectan fragmentos generados sin adaptación al problema.
+• El estudiante no comprende el código durante la defensa.
