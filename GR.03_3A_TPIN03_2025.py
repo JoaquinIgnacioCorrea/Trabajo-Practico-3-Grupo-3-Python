@@ -19,17 +19,17 @@ class DatasetDownloader:
     def descargar(self):
         if os.path.exists(self.__filename):
             print(f"El archivo '{self.__filename}' ya existe. No se descargará de nuevo.")
-            return
-        try:
-            response = requests.get(self.__url, stream=True)
-            response.raise_for_status()
-            os.makedirs(self.__save_dir, exist_ok=True)
-            with open(self.__filename, 'wb') as file:
-                for chunk in response.iter_content(chunk_size=8192):
-                    file.write(chunk)
-            print(f"Archivo descargado exitosamente y guardado en '{self.__filename}'.")
-        except requests.exceptions.RequestException as e:
-            print(f"Error al descargar el archivo: {e}")
+        else:
+            try:
+                response = requests.get(self.__url, stream=True)
+                response.raise_for_status()
+                os.makedirs(self.__save_dir, exist_ok=True)
+                with open(self.__filename, 'wb') as file:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        file.write(chunk)
+                print(f"Archivo descargado exitosamente y guardado en '{self.__filename}'.")
+            except requests.exceptions.RequestException as e:
+                print(f"Error al descargar el archivo: {e}")
     
     def extraer_dataset(self):
         if not os.path.exists(self.__filename):
@@ -119,14 +119,6 @@ class AnalizadorDatos:
     def filtrar_por_rango_anios(df, anio_inicio, anio_fin):
         return df[(df['anio'] >= anio_inicio) & (df['anio'] <= anio_fin)]
 
-    @staticmethod
-    def validar_opcion_menu(opciones_validas):
-        opcion = input("Ingrese su opción: ")
-        if opcion in opciones_validas:
-            return opcion
-        print(f"Opción inválida. Ingrese una de las siguientes: {', '.join(opciones_validas)}")
-        return None
-
 
 class AnalizadorRobosVehiculos:
     def __init__(self, carpeta_datos):
@@ -136,7 +128,7 @@ class AnalizadorRobosVehiculos:
         self.__provincias_disponibles = []
     
     def cargar_datos(self):
-        print("Cargando datos de robos de vehículos...")
+        print("Cargando datos de robos automotores...")
         self.__datos_originales = AnalizadorDatos.cargar_datasets_csv(self.__carpeta)
         
         if self.__datos_originales is None:
@@ -159,7 +151,7 @@ class AnalizadorRobosVehiculos:
     
     def estadisticas_generales(self):
         print("\n" + "="*60)
-        print("ESTADÍSTICAS GENERALES DEL DATASET")
+        print("ESTADÍSTICAS GENERALES")
         print("="*60)
         
         total_robos = len(self.__datos_procesados)
@@ -169,7 +161,7 @@ class AnalizadorRobosVehiculos:
         mediana_antiguedad = np.median(antiguedades)
         desviacion_antiguedad = np.std(antiguedades)
         
-        print(f"\nTotal de casos registrados: {total_robos}")
+        print(f"\nTotal de robos registrados: {total_robos}")
         print(f"Antigüedad promedio de vehículos robados: {media_antiguedad:.2f} años")
         print(f"Antigüedad mediana: {mediana_antiguedad:.0f} años")
         print(f"Desviación estándar de antigüedad: {desviacion_antiguedad:.2f} años")
@@ -194,9 +186,9 @@ class AnalizadorRobosVehiculos:
         casos_por_provincia = self.__datos_procesados.groupby('provincia').size()
         casos_ordenados = casos_por_provincia.sort_values(ascending=False)
         
-        print("\nTop 10 provincias con más casos:")
+        print("\nTop 10 provincias con más robos:")
         for i, (provincia, cantidad) in enumerate(casos_ordenados.head(10).items(), 1):
-            print(f"{i}. {provincia}: {cantidad} casos")
+            print(f"{i}. {provincia}: {cantidad} robos")
         
         return casos_ordenados
     
@@ -222,7 +214,7 @@ class AnalizadorRobosVehiculos:
         
         plt.xlabel('Provincia', fontsize=12)
         plt.ylabel('Cantidad de Robos', fontsize=12)
-        plt.title('Top 10 Provincias con Mayor Cantidad de Robos de Vehículos', fontsize=14, pad=20)
+        plt.title('Top 10 Provincias con Mayor Cantidad de Robos Automotores', fontsize=14, pad=20)
         plt.xticks(range(len(top_10_provincias)), top_10_provincias.index, rotation=45, ha='right')
         plt.grid(axis='y', alpha=0.3)
         plt.tight_layout()
@@ -234,7 +226,7 @@ class AnalizadorRobosVehiculos:
         
         plt.pie(top_marcas.values, labels=top_marcas.index, autopct='%1.1f%%', 
                 colors=colores, startangle=90)
-        plt.title('Distribución de Robos por Marca de Vehículo (Top 5)', fontsize=14, pad=20)
+        plt.title('Distribución de Robos por Marca del Vehículo (Top 5)', fontsize=14, pad=20)
         plt.axis('equal')
         plt.tight_layout()
         plt.show()
@@ -278,7 +270,7 @@ class AnalizadorRobosVehiculos:
         
         plt.xlabel('Mes', fontsize=12)
         plt.ylabel('Cantidad de Robos', fontsize=12)
-        plt.title('Evolución Mensual de Casos de Robos de Vehículos', fontsize=14, pad=20)
+        plt.title('Evolución Mensual de Robos Automotores', fontsize=14, pad=20)
         plt.xticks(range(1, 13), ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 
                                    'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'])
         plt.grid(True, alpha=0.3)
@@ -306,7 +298,7 @@ class AnalizadorRobosVehiculos:
                 print("Por favor, verifique el nombre e intente nuevamente.")
             else:
                 print(f"\nEstadísticas para {provincia_buscar}:")
-                print(f"  Total de casos: {stats['total']}")
+                print(f"  Total de robos: {stats['total']}")
                 print(f"  Antigüedad promedio: {stats['antiguedad_promedio']:.2f} años")
                 print(f"  Marca más afectada: {stats['marca_principal']}")
                 provincia_encontrada = True
@@ -342,7 +334,7 @@ def mostrar_menu():
     print("SISTEMA DE ANÁLISIS DE ROBOS AUTOMOTORES - DNRPA")
     print("="*60)
     print("\n1. Análisis completo con visualizaciones")
-    print("2. Consulta por provincia específica")
+    print("2. Consulta por provincia")
     print("3. Salir")
     print("\n" + "="*60)
 
@@ -355,6 +347,7 @@ print("="*60)
 print("\nPrimero necesitamos descargar el dataset")
 print("Ingrese la URL del archivo ZIP con los datos de DNRPA")
 print("(Ejemplo: https://datos.jus.gob.ar/dataset/.../download/...)")
+print("O presione Enter para usar la URL por defecto.")
 
 url_dataset = input("\nURL del dataset: ")
 
