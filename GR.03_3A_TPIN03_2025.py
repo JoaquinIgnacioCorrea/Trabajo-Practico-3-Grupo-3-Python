@@ -1,16 +1,131 @@
 import pandas as pd
 import numpy as np
 import os
+import requests
+import zipfile
+import os
 from matplotlib import pyplot as plt
-from funciones_analisis import (cargar_datasets_csv, limpiar_y_transformar, 
-                                 calcular_edad_vehiculo, obtener_top_marcas,
-                                 obtener_estadisticas_provincia, filtrar_por_rango_anios,
-                                 validar_opcion_menu)
-from dataset_downloader import DatasetDownloader
 
 
 def limpiar_pantalla():
     os.system('cls' if os.name == 'nt' else 'clear')
+
+class DatasetDownloader:
+    def __init__(self, url, save_dir):
+        self.__url = url
+        self.__save_dir = save_dir
+        self.__filename = os.path.join(save_dir, os.path.basename(url))
+
+    def descargar(self):
+        if os.path.exists(self.__filename):
+            print(f"El archivo '{self.__filename}' ya existe. No se descargará de nuevo.")
+            return
+        try:
+            response = requests.get(self.__url, stream=True)
+            response.raise_for_status()
+            os.makedirs(self.__save_dir, exist_ok=True)
+            with open(self.__filename, 'wb') as file:
+                for chunk in response.iter_content(chunk_size=8192):
+                    file.write(chunk)
+            print(f"Archivo descargado exitosamente y guardado en '{self.__filename}'.")
+        except requests.exceptions.RequestException as e:
+            print(f"Error al descargar el archivo: {e}")
+    
+    def extraer_dataset(self):
+        if not os.path.exists(self.__filename):
+            print(f"El archivo '{self.__filename}' no existe. No se puede extraer.")
+        else:
+            try:
+                with zipfile.ZipFile(self.__filename, 'r') as zip_ref:
+                    zip_ref.extractall(self.__save_dir)
+                os.remove(self.__filename)
+                print(f"Archivo extraído exitosamente en '{self.__save_dir}'.")
+            except zipfile.BadZipFile as e:
+                print(f"Error al extraer el archivo ZIP: {e}")
+
+class AnalizadorDatos:
+    @staticmethod
+    def cargar_datasets_csv(carpeta):
+        archivos = []
+        for archivo in os.listdir(carpeta):
+            if archivo.endswith('.csv'):
+                ruta_completa = os.path.join(carpeta, archivo)
+                archivos.append(ruta_completa)
+        dataframes = []
+        for ruta in archivos:
+            df = pd.read_csv(ruta)
+            dataframes.append(df)
+        if len(dataframes) > 0:
+            datos_combinados = pd.concat(dataframes, ignore_index=True)
+            return datos_combinados
+        return None
+
+    @staticmethod
+    def limpiar_y_transformar(df):
+        columnas_renombradas = {
+            'tramite_tipo': 'tipo_tramite',
+            'tramite_fecha': 'fecha_tramite',
+            'registro_seccional_provincia': 'provincia',
+            'automotor_anio_modelo': 'anio',
+            'automotor_tipo_descripcion': 'tipo_vehiculo',
+            'automotor_marca_descripcion': 'marca',
+            'automotor_uso_descripcion': 'uso',
+            'titular_genero': 'genero_titular',
+            'titular_anio_nacimiento': 'anio_nacimiento_titular',
+            'titular_domicilio_provincia': 'provincia_titular'
+        }
+        df_transformado = df.rename(columns=columnas_renombradas)
+        columnas_mantener = ['tipo_tramite', 'fecha_tramite', 'provincia', 'anio', 
+                             'tipo_vehiculo', 'marca', 'uso', 'genero_titular', 
+                             'anio_nacimiento_titular', 'provincia_titular']
+        df_transformado = df_transformado[columnas_mantener]
+        df_transformado = df_transformado[df_transformado['tipo_tramite'].notna()]
+        df_transformado = df_transformado[df_transformado['provincia'].notna()]
+        df_transformado = df_transformado[df_transformado['anio'] > 1980]
+        df_transformado['fecha_tramite'] = pd.to_datetime(df_transformado['fecha_tramite'], errors='coerce')
+        df_transformado['mes'] = df_transformado['fecha_tramite'].dt.month
+        df_transformado['anio_tramite'] = df_transformado['fecha_tramite'].dt.year
+        return df_transformado
+
+    @staticmethod
+    def calcular_edad_vehiculo(df):
+        anio_actual = 2025
+        df['antiguedad'] = anio_actual - df['anio']
+        return df
+
+
+
+    @staticmethod
+    def obtener_top_marcas(df, cantidad=10):
+        conteo_marcas = df['marca'].value_counts()
+        return conteo_marcas.head(cantidad)
+
+    @staticmethod
+    def obtener_estadisticas_provincia(df, provincia):
+        df_provincia = df[df['provincia'] == provincia]
+        if len(df_provincia) == 0:
+            return None
+        total_casos = len(df_provincia)
+        promedio_antiguedad = df_provincia['antiguedad'].mean()
+        marca_mas_robada = df_provincia['marca'].mode()[0] if len(df_provincia['marca'].mode()) > 0 else 'Sin datos'
+        estadisticas = {
+            'total': total_casos,
+            'antiguedad_promedio': promedio_antiguedad,
+            'marca_principal': marca_mas_robada
+        }
+        return estadisticas
+
+    @staticmethod
+    def filtrar_por_rango_anios(df, anio_inicio, anio_fin):
+        return df[(df['anio'] >= anio_inicio) & (df['anio'] <= anio_fin)]
+
+    @staticmethod
+    def validar_opcion_menu(opciones_validas):
+        opcion = input("Ingrese su opción: ")
+        if opcion in opciones_validas:
+            return opcion
+        print(f"Opción inválida. Ingrese una de las siguientes: {', '.join(opciones_validas)}")
+        return None
 
 
 class AnalizadorRobosVehiculos:
@@ -22,7 +137,7 @@ class AnalizadorRobosVehiculos:
     
     def cargar_datos(self):
         print("Cargando datos de robos de vehículos...")
-        self.__datos_originales = cargar_datasets_csv(self.__carpeta)
+        self.__datos_originales = AnalizadorDatos.cargar_datasets_csv(self.__carpeta)
         
         if self.__datos_originales is None:
             print("No se encontraron archivos CSV en la carpeta especificada")
@@ -33,8 +148,8 @@ class AnalizadorRobosVehiculos:
     
     def procesar_datos(self):
         print("\nProcesando y transformando datos...")
-        self.__datos_procesados = limpiar_y_transformar(self.__datos_originales)
-        self.__datos_procesados = calcular_edad_vehiculo(self.__datos_procesados)
+        self.__datos_procesados = AnalizadorDatos.limpiar_y_transformar(self.__datos_originales)
+        self.__datos_procesados = AnalizadorDatos.calcular_edad_vehiculo(self.__datos_procesados)
         
         provincias_unicas = self.__datos_procesados['provincia'].dropna().unique()
         self.__provincias_disponibles = sorted(provincias_unicas)
@@ -90,7 +205,7 @@ class AnalizadorRobosVehiculos:
         print("ANÁLISIS DE MARCAS MÁS AFECTADAS")
         print("="*60)
         
-        top_marcas = obtener_top_marcas(self.__datos_procesados, 5)
+        top_marcas = AnalizadorDatos.obtener_top_marcas(self.__datos_procesados, 5)
         
         print("\nTop 5 marcas más robadas:")
         for i, (marca, cantidad) in enumerate(top_marcas.items(), 1):
@@ -175,7 +290,7 @@ class AnalizadorRobosVehiculos:
         print("CONSULTA POR PROVINCIA")
         print("="*60)
         
-        print("\nProvincias disponibles:")
+        print("\nProvincias con datos:")
         for provincia in self.__provincias_disponibles:
             print(f"  {provincia}")
         
@@ -184,7 +299,7 @@ class AnalizadorRobosVehiculos:
         while not provincia_encontrada:
             provincia_buscar = input("\nIngrese el nombre de la provincia a consultar: ")
             
-            stats = obtener_estadisticas_provincia(self.__datos_procesados, provincia_buscar)
+            stats = AnalizadorDatos.obtener_estadisticas_provincia(self.__datos_procesados, provincia_buscar)
             
             if stats is None:
                 print(f"\nNo se encontraron datos para la provincia '{provincia_buscar}'")
@@ -232,53 +347,54 @@ def mostrar_menu():
     print("\n" + "="*60)
 
 
-if __name__ == "__main__":
-    limpiar_pantalla()
-    print("="*60)
-    print("SISTEMA DE ANÁLISIS DE ROBOS AUTOMOTORES - DNRPA")
-    print("="*60)
-    print("\nPrimero necesitamos descargar el dataset")
-    print("Ingrese la URL del archivo ZIP con los datos de DNRPA")
-    print("(Ejemplo: https://datos.jus.gob.ar/dataset/.../download/...)")
-    
-    url_dataset = input("\nURL del dataset: ").strip()
-    
-    if not url_dataset:
-        url_dataset = "https://datos.jus.gob.ar/dataset/a9bdfec2-0af4-433a-b810-38c91275a251/resource/c5eb0b07-c6e6-49f1-8ea0-165c957f5f94/download/dnrpa-robos-recuperos-autos-2025.zip"
-        print(f"\nUsando URL por defecto...")
-    
-    carpeta_datasets = "./datasets"
-    
-    print("\nDescargando dataset...")
-    downloader = DatasetDownloader(url_dataset, carpeta_datasets)
-    downloader.descargar()
-    downloader.extraer_dataset()
-    
-    print("\nDataset listo. Iniciando sistema de análisis...")
-    input("Presione Enter para continuar...")
-    limpiar_pantalla()
-    
-    analizador = AnalizadorRobosVehiculos(carpeta_datasets)
-    
-    ejecutando = True
-    
-    while ejecutando:
-        mostrar_menu()
-        opcion = validar_opcion_menu(['1', '2', '3'])
-        
-        if opcion == '1':
-            limpiar_pantalla()
-            analizador.ejecutar_analisis_completo()
-        
-        elif opcion == '2':
-            limpiar_pantalla()
-            if analizador._AnalizadorRobosVehiculos__datos_procesados is None:
-                print("\nCargando datos necesarios...")
-                analizador.cargar_datos()
-                analizador.procesar_datos()
-            analizador.consulta_interactiva_provincia()
-        
-        elif opcion == '3':
-            limpiar_pantalla()
-            print("\nFinalizando análisis. Hasta pronto.")
-            ejecutando = False
+
+limpiar_pantalla()
+print("="*60)
+print("SISTEMA DE ANÁLISIS DE ROBOS AUTOMOTORES - DNRPA")
+print("="*60)
+print("\nPrimero necesitamos descargar el dataset")
+print("Ingrese la URL del archivo ZIP con los datos de DNRPA")
+print("(Ejemplo: https://datos.jus.gob.ar/dataset/.../download/...)")
+
+url_dataset = input("\nURL del dataset: ")
+
+if not url_dataset:
+    url_dataset = "https://datos.jus.gob.ar/dataset/a9bdfec2-0af4-433a-b810-38c91275a251/resource/c5eb0b07-c6e6-49f1-8ea0-165c957f5f94/download/dnrpa-robos-recuperos-autos-2025.zip"
+    print("\nUsando URL por defecto...")
+
+carpeta_datasets = "./datasets"
+
+print("\nDescargando dataset...")
+downloader = DatasetDownloader(url_dataset, carpeta_datasets)
+downloader.descargar()
+downloader.extraer_dataset()
+
+print("\nDataset descargado.")
+input("Presione Enter para continuar...")
+limpiar_pantalla()
+
+analizador = AnalizadorRobosVehiculos(carpeta_datasets)
+
+ejecutando = True
+while ejecutando:
+    mostrar_menu()
+    opcion = None
+    while opcion is None:
+        opcion = input("Ingrese su opción: ")
+        if opcion not in ['1', '2', '3']:
+            print(f"Opción inválida. Ingrese una de las siguientes: 1, 2, 3")
+            opcion = None
+    if opcion == '1':
+        limpiar_pantalla()
+        analizador.ejecutar_analisis_completo()
+    elif opcion == '2':
+        limpiar_pantalla()
+        if analizador._AnalizadorRobosVehiculos__datos_procesados is None:
+            print("\nCargando datos necesarios...")
+            analizador.cargar_datos()
+            analizador.procesar_datos()
+        analizador.consulta_interactiva_provincia()
+    elif opcion == '3':
+        limpiar_pantalla()
+        print("\nFinalizando análisis. Hasta pronto.")
+        ejecutando = False
