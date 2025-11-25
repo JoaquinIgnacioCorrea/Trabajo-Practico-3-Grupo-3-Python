@@ -233,7 +233,7 @@ class AnalizadorRobosVehiculos:
     def grafico_antiguedad(self):
         antiguedades = self.__datos_procesados['antiguedad'].values
         plt.figure(figsize=(12, 7))
-        bins, patches = plt.hist(antiguedades, bins=30, edgecolor='black', alpha=0.7)
+        conteo, bins, patches = plt.hist(antiguedades, bins=30, edgecolor='black', alpha=0.7)
         media = np.mean(antiguedades)
         
         for i, patch in enumerate(patches):
