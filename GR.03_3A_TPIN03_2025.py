@@ -210,8 +210,7 @@ class AnalizadorRobosVehiculos:
         
         plt.figure(figsize=(12, 7))
         colores = plt.cm.viridis(np.linspace(0, 0.9, len(top_10_provincias)))
-        barras = plt.bar(range(len(top_10_provincias)), top_10_provincias.values, color=colores)
-        
+        plt.bar(range(len(top_10_provincias)), top_10_provincias.values, color=colores)
         plt.xlabel('Provincia', fontsize=12)
         plt.ylabel('Cantidad de Robos', fontsize=12)
         plt.title('Top 10 Provincias con Mayor Cantidad de Robos Automotores', fontsize=14, pad=20)
@@ -233,11 +232,8 @@ class AnalizadorRobosVehiculos:
     
     def grafico_antiguedad(self):
         antiguedades = self.__datos_procesados['antiguedad'].values
-        
         plt.figure(figsize=(12, 7))
-        
-        conteo, bins, patches = plt.hist(antiguedades, bins=30, edgecolor='black', alpha=0.7)
-        
+        bins, patches = plt.hist(antiguedades, bins=30, edgecolor='black', alpha=0.7)
         media = np.mean(antiguedades)
         
         for i, patch in enumerate(patches):
